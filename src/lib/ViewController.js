@@ -20,9 +20,8 @@ const routes = {
   '/profile': profile,
 };
 
-export const onNavigate = (pathname, urlParam) => {
-  window.history.pushState({}, pathname, window.location.origin + pathname + (urlParam ? `?${urlParam.toString()}` : ''));
-  console.log(urlParam.get);
+export const onNavigate = (pathname) => {
+  window.history.pushState({}, pathname, window.location.origin + pathname);
   while (rootDiv.firstChild) {
     rootDiv.removeChild(rootDiv.firstChild);
   }
