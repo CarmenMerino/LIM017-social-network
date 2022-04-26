@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-cycle */
 import { Menu } from '../templates/Menu.js';
 import { getUserLocalStorage } from '../firebase/authentication.js';
@@ -48,14 +49,16 @@ export const profile = () => {
   // Llamamos la variable que nos devuelve los posts por usuario.
   postByUser.then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
-      const templatePostUser = `<div class="perfilPost"> 
-                                  <div class = "div-category-post">
-                                    <p class = "category-post ${doc.data().Categoría}">${doc.data().Categoría}</p>
+      const postUser = document.createElement('div');
+      postUser.setAttribute('class', 'perfilPost');
+      postUser.setAttribute('id', doc.id);
+      const templatePostUser = `<div class = "div-category-post">
+                                    <p class = "category-post ${doc.data().Categoria}">${doc.data().Categoria}</p>
                                   </div>
                                   <div class ="container-post">
                                     <div class = "title-and-icons">
                                       <div class ="div-title">
-                                        <p>${doc.data().Título}</p>
+                                        <p>${doc.data().Titulo}</p>
                                       </div>
                                       <div class = "div-icons">
                                         <button class = "btn-delete" data-id = "${doc.id}" >
@@ -67,9 +70,9 @@ export const profile = () => {
                                     <div class = "div-img-profile">
                                       <img class = "img-post" src = ${doc.data().Foto}>
                                     </div>
-                                  </div>
-                                </div>`;
-      divPostProfile.innerHTML += templatePostUser;
+                                  </div>`;
+      postUser.innerHTML = templatePostUser;
+      divPostProfile.appendChild(postUser);
 
       // LLamamos a los botones para borrar post
       const btnDelete = divPostProfile.querySelectorAll('.btn-delete');
@@ -78,7 +81,7 @@ export const profile = () => {
         btn.addEventListener('click', ({ target: { dataset } }) => {
           const idPost = dataset.id;
           // Aquí traemos el modal
-          const root = document.getElementById('root');
+          const root = document.getElementById(idPost);
           const modal = document.querySelector('.div-delete-post');
           if (modal) {
             modal.remove();
@@ -95,7 +98,6 @@ export const profile = () => {
           const params = new URLSearchParams();
           params.set('editPostId', idPost);
           onNavigate('/publications', params);
-          // console.log(editPost(idPost, { Título: 'Linda chompa roja' }));
         });
       });
     });

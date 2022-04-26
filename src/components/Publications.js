@@ -1,13 +1,12 @@
 /* eslint-disable no-console */
 /* eslint-disable import/no-cycle */
 import { uploadAndDownloadImage } from '../firebase/storage.js';
-import { insertData } from '../firebase/database.js';
+import { editPost, getDataPost, insertData } from '../firebase/database.js';
 import { onNavigate } from '../lib/ViewController.js';
 import { Menu } from '../templates/Menu.js';
 import { getUserLocalStorage } from '../firebase/authentication.js';
 
-export const publications = () => {
-  
+export const publications = (urlParam) => {
   const sectionPublications = document.createElement('section');
   sectionPublications.setAttribute('class', 'section-publications');
 
@@ -164,19 +163,32 @@ export const publications = () => {
   const userPublication = getUserLocalStorage();
   btnSubmit.addEventListener('click', () => {
     const publication = {
-      Título: inputTitle.value,
-      Foto: getImageUrl,
+      Titulo: inputTitle.value,
+      Foto: image.getAttribute('src'),
       Estado: selectState.value,
-      Categoría: selectCategory.value,
+      Categoria: selectCategory.value,
       Description: inputDescription.value,
       Fecha: new Date(),
       uidUser: userPublication.uid,
       photoUser: userPublication.photoURL,
       Likes: [],
     };
-    insertData(publication);
+    if (urlParam.has('editPostId')) {
+      editPost(urlParam.get('editPostId'), publication);
+    } else {
+      insertData(publication);
+    }
     return onNavigate('/home');
   });
-
+  if (urlParam.has('editPostId')) {
+    getDataPost(urlParam.get('editPostId')).then((postDoc) => {
+      const postdata = postDoc.data();
+      image.setAttribute('src', postdata.Foto);
+      inputTitle.value = postdata.Titulo;
+      selectCategory.value = postdata.Categoria;
+      selectState.value = postdata.Estado;
+      inputDescription.value = postdata.Description;
+    });
+  }
   return sectionPublications;
 };

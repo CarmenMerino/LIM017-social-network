@@ -2,8 +2,7 @@
 /* eslint-disable max-len */
 /* eslint-disable import/no-cycle */
 import { onNavigate } from '../lib/ViewController.js';
-import { signIn, signGoogle, setUserLocalStorage } from '../firebase/authentication.js';
-import { getDataUsers } from '../firebase/database.js';
+import { signGoogle, signIn } from '../lib/index.js';
 
 export const login = () => {
   const loginSection = document.createElement('section');
@@ -43,6 +42,7 @@ export const login = () => {
   inputEmail.setAttribute('placeholder', 'Email');
   inputEmail.setAttribute('class', 'input');
   inputEmail.setAttribute('id', 'login-email');
+  inputEmail.setAttribute('autocomplete', 'useremail');
 
   const divInvalidEmail = document.createElement('div');
   divInvalidEmail.setAttribute('class', 'div-little-messages');
@@ -55,6 +55,7 @@ export const login = () => {
   inputPassword.setAttribute('placeholder', 'Contraseña');
   inputPassword.setAttribute('class', 'input');
   inputPassword.setAttribute('id', 'login-password');
+  inputPassword.setAttribute('autocomplete', 'currentpassword');
 
   const divInvalidPassword = document.createElement('div');
   divInvalidPassword.setAttribute('class', 'div-little-messages');
@@ -132,23 +133,15 @@ export const login = () => {
   loginSection.appendChild(divLogin);
 
   aLinkRegister.addEventListener('click', () => onNavigate('/register'));
-  aLinkGoogle.addEventListener('click', signGoogle);
+  aLinkGoogle.addEventListener('click', () => signGoogle().then(() => onNavigate('/home')));
   loginBtn.addEventListener('click', () => {
     signIn(inputEmail.value, inputPassword.value)
       .then((user) => {
-        getDataUsers(user.uid).then((result) => {
-          if (!result.empty) {
-            const userData = result.docs[0].data();
-            setUserLocalStorage(userData);
-            if (user.emailVerified) {
-              onNavigate('/home');
-            } else {
-              pEmailVerified.innerText = 'Por favor verifica tu correo para ingresar a Slowly';
-            }
-          } else {
-            console.log('usuario no registrado');
-          }
-        });
+        if (user.emailVerified) {
+          onNavigate('/home');
+        } else {
+          pEmailVerified.innerText = 'Por favor verifica tu correo para ingresar a Slowly';
+        }
       })
       .catch((error) => {
         const errorCode = error.code;

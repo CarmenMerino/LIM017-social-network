@@ -1,9 +1,6 @@
 /* eslint-disable import/no-cycle */
 import { onNavigate } from '../lib/ViewController.js';
-import {
-  createUser, signGoogle, setUserLocalStorage, getUserLocalStorage, sendEmail,
-} from '../firebase/authentication.js';
-import { insertDataUser } from '../firebase/database.js';
+import { createUser, signGoogle } from '../lib/index.js';
 import { registerModal } from '../templates/modal.js';
 
 /* eslint-disable max-len */
@@ -45,6 +42,7 @@ export const register = () => {
   inputName.setAttribute('placeholder', 'Nombre');
   inputName.setAttribute('class', 'input');
   inputName.setAttribute('id', 'register-name');
+  inputName.setAttribute('autocomplete', 'username');
 
   const divMessageName = document.createElement('div');
   divMessageName.setAttribute('class', 'div-little-messages');
@@ -57,6 +55,7 @@ export const register = () => {
   inputEmail.setAttribute('placeholder', 'Email');
   inputEmail.setAttribute('class', 'input');
   inputEmail.setAttribute('id', 'register-email');
+  inputEmail.setAttribute('autocomplete', 'email');
 
   const divWrongEmail = document.createElement('div');
   divWrongEmail.setAttribute('class', 'div-little-messages');
@@ -69,6 +68,7 @@ export const register = () => {
   inputPassword.setAttribute('placeholder', 'Contraseña');
   inputPassword.setAttribute('class', 'input');
   inputPassword.setAttribute('id', 'register-password');
+  inputPassword.setAttribute('autocomplete', 'new-password');
 
   const divMinPassword = document.createElement('div');
   divMinPassword.setAttribute('class', 'div-little-messages');
@@ -82,6 +82,7 @@ export const register = () => {
   inputConfirmPassword.setAttribute('placeholder', 'Confirmar contraseña');
   inputConfirmPassword.setAttribute('class', 'input');
   inputConfirmPassword.setAttribute('id', 'register-confirm');
+  inputConfirmPassword.setAttribute('autocomplete', 'new-password');
 
   const divWrongPassword = document.createElement('div');
   divWrongPassword.setAttribute('class', 'div-little-messages');
@@ -164,13 +165,7 @@ export const register = () => {
       pWrongPassword.innerText = 'Las contraseñas no coinciden.';
     } else {
       createUser(inputEmail.value, inputPassword.value, inputName.value)
-        .then((user) => {
-          setUserLocalStorage(user);
-          const dataUser = getUserLocalStorage();
-          insertDataUser(dataUser);
-          sendEmail(user);
-          (onNavigate('/login')).appendChild(registerModal()); // Aquí le estamos pasando el modal que muestra mensaje de link.
-        })
+        .then(() => (onNavigate('/login')).appendChild(registerModal()))
         .catch((error) => {
           const errorCode = error.code;
           switch (errorCode) {
@@ -193,7 +188,11 @@ export const register = () => {
         });
     }
   });
-  aLinkGoogle.addEventListener('click', signGoogle);
+  aLinkGoogle.addEventListener('click', () => {
+    signGoogle().then(() => {
+      onNavigate('/home');
+    });
+  });
 
   return registerSection;
 };
